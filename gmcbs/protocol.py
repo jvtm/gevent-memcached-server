@@ -10,6 +10,11 @@ ClientHandler class can also be extended to handle your own commands:
 
 Another option is to pass in explicit handler dictionary. You then
 need to define _all_ handlers, including QUIT, NOOP and others.
+
+It's also possible to modify the handler dictionary from outside.
+
+Note: this is just a prototype interface, and might change quite a bit
+once glued together with existing storage implementations.
 """
 
 from gmcbs.const import *
@@ -27,10 +32,10 @@ def pack_response(request, status=RESPONSE_SUCCESS, key=b'', extra=b'', value=b'
     Maybe those could be added later, if required (const.py already has some extra named tuples).
     For example, if connection loop part wants to access any of the values (hooks or similar)
     """
-    header = struct.pack(HEADER_RESPONSE_FORMAT, MAGIC_RES, request.opcode,
+    header = struct.pack(HEADER_RESPONSE_FORMAT, MAGIC_RES, request.header.opcode,
                          len(key), len(extra), datatype, status,
                          len(key) + len(extra) + len(value),
-                         request.opaque, cas)
+                         request.header.opaque, cas)
     return header + extra + key + value
 
 
@@ -49,8 +54,6 @@ class ClientHandler(object):
             # intentionally imported here, to make (gevent) monkey patching easier
             import threading
             threading.current_thread().setName("%s:%s" % sock.getpeername())
-
-        # TODO: set tcp keepalive here
 
         self.buffer_in = bytearray()
         self.buffer_out = bytearray()
@@ -104,13 +107,13 @@ class ClientHandler(object):
             raise ValueError("Invalid magic byte %#.2x" % header.magic)
 
         # extra, key, value might also be empty strings
-        extra = self.read_bytes(header.extralen)
+        extra = self.read_bytes(header.extlen)
         self.log.debug("extra: %r", extra)
 
         key = self.read_bytes(header.keylen)
         self.log.debug("key: %r", key)
 
-        remaining = header.bodylen - header.extralen - header.keylen
+        remaining = header.bodylen - header.extlen - header.keylen
         value = self.read_bytes(remaining)
         self.log.debug("value: %r", value)
 
@@ -119,6 +122,8 @@ class ClientHandler(object):
 
         return Message(header, extra, key, value)
 
+    # XXX: this interface might still change. or these default ones might disappear.
+    # right now these are enough for pylibmc doing get_multi() + disconnect
     def do_get(self, request):
         return pack_response(request, status=RESPONSE_KEY_ENOENT)
 
@@ -129,7 +134,7 @@ class ClientHandler(object):
         return pack_response(request, key=request.key, status=RESPONSE_KEY_ENOENT)
 
     def do_getkq(self, request):
-        return self.do_getkq(request)
+        return self.do_getk(request)
 
     def do_noop(self, request):
         return pack_response(request)
@@ -172,10 +177,11 @@ class ClientHandler(object):
 
             if opcode in (CMD_QUIT, CMD_QUITQ):
                 self.log_stats(COMMANDS[opcode])
+                self.stats['time_quit'] = time.time()
                 break
         return self.stats
 
-    def log_stats(self, prefix="status", level=logging.INFO):
+    def log_stats(self, prefix="STATUS", level=logging.INFO):
         """ Logs client statistics """
         # TODO: call this periodically? then it would be nice to show ops/s for the last period (not full connection)
         now = time.time()
