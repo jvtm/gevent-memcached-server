@@ -87,6 +87,8 @@ CMD_RDECRQ = 0x3c
 # See section 3.4 Data Types
 TYPE_RAW_BYTES = 0x00
 
+# Extra bytes for GET, GETK responses. pylibmc treats this as serialization type
+EXTRA_GET = '\x00\x00\x00\x00'
 
 # Helper dictionaries etc for Python.
 # Yes, a bit hacky... but I'm a lazy person.
@@ -119,6 +121,7 @@ RequestHeader = namedtuple('RequestHeader', ['magic', 'opcode', 'keylen', 'extle
                                              'datatype', 'bodylen', 'opaque', 'cas'])
 ResponseHeader = namedtuple('ResponseHeader', ['magic', 'opcode', 'keylen', 'extlen',
                                                'datatype', 'status', 'bodylen', 'opaque', 'cas'])
+Message = namedtuple('Message', ['header', 'extra', 'key', 'value'])
 
 
 # magic, opcode, keylen, extralen, datatype, [reserved], bodylen, opaque, cas
