@@ -7,6 +7,7 @@ Originally generated from protocol_binary.h:
    > gmcbs/const.py
 
 """
+from collections import namedtuple
 import struct
 
 # Definition of the legal "magic" values used in a packet.
@@ -84,7 +85,7 @@ CMD_RDECRQ = 0x3c
 
 # Definition of the data types in the packet
 # See section 3.4 Data Types
-RAW_BYTES = 0x00
+TYPE_RAW_BYTES = 0x00
 
 
 # Helper dictionaries etc for Python.
@@ -92,6 +93,7 @@ RAW_BYTES = 0x00
 COMMANDS = {}
 RESPONSES = {}
 MAGIC = {}
+TYPES = {}
 QUIET = []
 for k, v in locals().items():
     if k.startswith('CMD_'):
@@ -103,11 +105,20 @@ for k, v in locals().items():
         RESPONSES[v] = k[9:]
     elif k.startswith('MAGIC_'):
         MAGIC[v] = k[6:]
+    elif k.startswith('TYPE_'):
+        TYPES[v] = k[5:]
 
 assert COMMANDS[CMD_QUIT] == 'QUIT'
 assert RESPONSES[RESPONSE_SUCCESS] == 'SUCCESS'
 assert MAGIC[MAGIC_REQ] == 'REQ'
+assert TYPES[TYPE_RAW_BYTES] == 'RAW_BYTES'
 assert CMD_GETKQ in QUIET
+
+
+RequestHeader = namedtuple('RequestHeader', ['magic', 'opcode', 'keylen', 'extlen',
+                                             'datatype', 'bodylen', 'opaque', 'cas'])
+ResponseHeader = namedtuple('ResponseHeader', ['magic', 'opcode', 'keylen', 'extlen',
+                                               'datatype', 'status', 'bodylen', 'opaque', 'cas'])
 
 
 # magic, opcode, keylen, extralen, datatype, [reserved], bodylen, opaque, cas
