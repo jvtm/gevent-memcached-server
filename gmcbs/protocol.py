@@ -166,7 +166,7 @@ class ClientHandler(object):
             if opcode in self.handlers:
                 response = self.handlers[opcode](request)
             else:
-                self.log.warning("No handler for %r", request.header)
+                self.log.warning("No handler for %s %#.2x %r", COMMANDS.get(opcode), opcode, request.header)
                 response = pack_response(request, status=RESPONSE_UNKNOWN_COMMAND)
 
             if response:
