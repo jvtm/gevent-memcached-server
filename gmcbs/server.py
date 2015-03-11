@@ -16,11 +16,13 @@ import sys
 class ConnectionHelper(object):
     """ Helper class / callable for single client connection """
     # this is still a class so that we can pass in config dict and others
-    def __init__(self, tcp_keepalive=True):
+    def __init__(self, handler_class=ClientHandler, handler_kwargs=None, tcp_keepalive=True):
         self.log = logging.getLogger(self.__class__.__name__)
         if tcp_keepalive is True:
             tcp_keepalive = (1800, 30, 3)
         self.tcp_keepalive = tcp_keepalive
+        self.handler_class = handler_class
+        self.handler_kwargs = dict(handler_kwargs or [])
 
     def __call__(self, sock, addr):
         addrinfo = "%s:%s" % addr
@@ -31,12 +33,14 @@ class ConnectionHelper(object):
             sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, self.tcp_keepalive[0])
             sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, self.tcp_keepalive[1])
             sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, self.tcp_keepalive[2])
-        handler = ClientHandler(sock)
+        handler = self.handler_class(sock, **self.handler_kwargs)
         try:
             handler.serve_client()
         finally:
             handler.log_stats("DISCONNECT")
-            self.log.info("disconnected %s", addrinfo)
+            # needs some error handling (revisiting after seeing this in full action)
+            self.log.info("disconnected %s %s", sock, addrinfo)
+            sock.close()
 
 
 def main(argv=None):
