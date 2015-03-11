@@ -1,0 +1,18 @@
+Source: gevent-memcached-server
+Section: python
+Priority: optional
+Maintainer: Jyrki Muukkonen <jyrki.muukkonen@f-secure.com>
+Build-Depends: debhelper (>= 8), python (>= 2.7.3-4), dh-python, python-setuptools
+Vcs-Browser: https://github.com/jvtm/gevent-memcached-server
+Standards-Version: 3.9.6
+X-Python-Version: >= 2.7
+
+Package: python-gevent-memcached-server
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-gevent (>= 1.0.1-2)
+Description: Helper for creating Memcached binary protocol servers
+ Includes Memcached binary protocol handler and examples gevent
+ server for implementing custom Memcached servers.
+ Useful for testing and creating compatibility layers for migrating
+ away from memcached.
+

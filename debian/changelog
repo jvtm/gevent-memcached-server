@@ -1,0 +1,5 @@
+gevent-memcached-server (0.1) UNRELEASED; urgency=medium
+
+  * Initial release.
+
+ -- Jyrki Muukkonen <jyrki.muukkonen@f-secure.com>  Wed, 11 Mar 2015 17:54:54 +0200
