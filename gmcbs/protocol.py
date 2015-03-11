@@ -21,6 +21,7 @@ from gmcbs.const import *
 from collections import defaultdict
 from datetime import timedelta
 import logging
+import os
 import struct
 import time
 
@@ -144,6 +145,22 @@ class ClientHandler(object):
 
     def do_quitq(self, request):
         return self.do_quit(request)
+
+    def do_stat(self, request):
+        """ STAT command, expects multiple reply packets + one empty packet  """
+        if request.key:
+            # would need to read more memcached code for the specific keys
+            self.log.warning("TODO: STAT %r", request)
+            return pack_response(request, key=request.key, status=RESPONSE_KEY_ENOENT)
+        stats = {
+            'time': '%d' % time.time(),
+            'pid': str(os.getpid()),
+        }
+        ret = []
+        for key, value in stats.iteritems():
+            ret.append(pack_response(request, key=key, value=value))
+        ret.append(pack_response(request))
+        return ''.join(ret)
 
     def send_replies(self):
         """ Flush all buffered replies (usually at least one) """
