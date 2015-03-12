@@ -6,7 +6,11 @@ any socket server.
 *This is still a prototype, so the internal API might change quite a bit.
 Please star and/or fork the github repo if you already find this useful.*
 
-This is _very loosely_ based on
-[twisted-memcached](https://github.com/dustin/twisted-memcached)
-by Dustin Sallings, but doesn't actually share any code.
+Specifications and related software:
+
+ * [Memcache Binary Protocol](https://code.google.com/p/memcached/wiki/MemcacheBinaryProtocol)
+ * [twisted-memcached](https://github.com/dustin/twisted-memcached)
+ * [pyermc](https://github.com/upsight/pyermc)
+ * [pylibmc](http://sendapatch.se/projects/pylibmc/)
+ * ...
 
