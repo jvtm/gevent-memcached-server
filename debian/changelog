@@ -1,4 +1,4 @@
-gevent-memcached-server (0.1) UNRELEASED; urgency=medium
+gevent-memcached-server (0.1.0) UNRELEASED; urgency=medium
 
   * Initial release.
 
