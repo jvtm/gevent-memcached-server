@@ -72,7 +72,7 @@ class ClientHandler(object):
                     handlers[opcode] = handler
         self.handlers = handlers
 
-    def read_bytes(self, amount, chunk_size=1024):
+    def read_bytes(self, amount, chunk_size=4096):
         """
         Return explicit amount of bytes from socket.
         Uses input buffer internally, for reading multiple request
@@ -87,8 +87,8 @@ class ClientHandler(object):
             chunk = self.sock.recv(chunk_size)
             self.log.debug("bytes read: %d", len(chunk))
             if chunk == '':
-                continue
-                #gevent.sleep()
+                # client most likely gone, but recv() doesn't fail
+                break
             else:
                 self.buffer_in.extend(chunk)
 
@@ -102,7 +102,10 @@ class ClientHandler(object):
         Reads a single client request using self.read_bytes().
         :return: Message named tuple (header, extra, key, value)
         """
-        header = RequestHeader._make(struct.unpack(HEADER_REQUEST_FORMAT, self.read_bytes(HEADER_REQUEST_LEN)))
+        packet = self.read_bytes(HEADER_REQUEST_LEN)
+        if not packet:
+            return
+        header = RequestHeader._make(struct.unpack(HEADER_REQUEST_FORMAT, packet))
         self.log.debug("header: %r", header)
         if header.magic != MAGIC_REQ:
             raise ValueError("Invalid magic byte %#.2x" % header.magic)
@@ -179,6 +182,9 @@ class ClientHandler(object):
         while True:
             request = self.read_request()
             self.log.debug("request: %r", request)
+            if not request:
+                self.log.error("No data received. Client disconnected?")
+                break
             opcode = request.header.opcode
             if opcode in self.handlers:
                 response = self.handlers[opcode](request)
