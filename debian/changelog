@@ -1,4 +1,10 @@
-gevent-memcached-server (0.1.0) UNRELEASED; urgency=medium
+gevent-memcached-server (0.2.0) UNRELEASED; urgency=medium
+
+  * Fix client disconnect busy loop
+
+ -- Jyrki Muukkonen <jyrki.muukkonen@f-secure.com>  Mon, 11 May 2015 01:01:38 +0300
+
+gevent-memcached-server (0.1.0) unstable; urgency=medium
 
   * Initial release.
 
