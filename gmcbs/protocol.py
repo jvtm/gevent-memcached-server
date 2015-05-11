@@ -68,7 +68,7 @@ class ClientHandler(object):
                 funcname = 'do_%s' % opname.lower()
                 handler = getattr(self, funcname, None)
                 if handler:
-                    self.log.debug("registered andler %s (%#.2x): %r", opname, opcode, handler)
+                    self.log.debug("registered handler %s (%#.2x): %r", opname, opcode, handler)
                     handlers[opcode] = handler
         self.handlers = handlers
 
