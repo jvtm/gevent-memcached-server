@@ -58,6 +58,7 @@ class ConnectionHelper(object):
             handler.log_stats("DISCONNECT")
             # needs some error handling (revisiting after seeing this in full action)
             self.log.info("disconnected %s %s", sock, addrinfo)
+            sock.shutdown()
             sock.close()
 
 
